@@ -3,20 +3,20 @@ import 'package:android_intent_plus/android_intent.dart';
 import 'package:android_intent_plus/flag.dart';
 
 void main() {
-  runApp(const FakeSettingsApp());
+  runApp(const SettingsApp());
 }
 
-class FakeSettingsApp extends StatelessWidget {
-  const FakeSettingsApp({super.key});
+class SettingsApp extends StatelessWidget {
+  const SettingsApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: "Ayarlar",
+      title: 'Ayarlar',
       theme: ThemeData(
         useMaterial3: true,
-        colorSchemeSeed: Colors.blue,
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
       ),
       home: const SettingsHome(),
     );
@@ -31,27 +31,46 @@ class SettingsHome extends StatefulWidget {
 }
 
 class _SettingsHomeState extends State<SettingsHome> {
-  String searchQuery = "";
+  String query = "";
 
-  final List<Map<String, dynamic>> settingsItems = [
-    {"title": "Wi-Fi", "icon": Icons.wifi, "action": "android.settings.WIFI_SETTINGS"},
-    {"title": "Bluetooth", "icon": Icons.bluetooth, "action": "android.settings.BLUETOOTH_SETTINGS"},
-    {"title": "Mobil Veri", "icon": Icons.network_cell, "action": "android.settings.DATA_ROAMING_SETTINGS"},
-    {"title": "Ekran", "icon": Icons.display_settings, "action": "android.settings.DISPLAY_SETTINGS"},
-    {"title": "Ses", "icon": Icons.volume_up, "action": "android.settings.SOUND_SETTINGS"},
-    {"title": "Bildirimler", "icon": Icons.notifications, "action": "android.settings.NOTIFICATION_SETTINGS"},
-    {"title": "Pil", "icon": Icons.battery_full, "action": "android.settings.BATTERY_SAVER_SETTINGS"},
-    {"title": "Uygulamalar", "icon": Icons.apps, "action": "android.settings.APPLICATION_SETTINGS"},
-    {"title": "Depolama", "icon": Icons.sd_storage, "action": "android.settings.INTERNAL_STORAGE_SETTINGS"},
-    {"title": "Güvenlik", "icon": Icons.lock, "action": "android.settings.SECURITY_SETTINGS"},
-    {"title": "Gizlilik", "icon": Icons.privacy_tip, "action": "android.settings.PRIVACY_SETTINGS"},
-    {"title": "Hesaplar", "icon": Icons.person, "action": "android.settings.SYNC_SETTINGS"},
-    {"title": "Dil ve Giriş", "icon": Icons.language, "action": "android.settings.LOCALE_SETTINGS"},
-    {"title": "Yedekleme", "icon": Icons.backup, "action": "android.settings.BACKUP_AND_RESET_SETTINGS"},
-    {"title": "Telefon Hakkında", "icon": Icons.info, "custom": true},
-  ];
+  final Map<String, List<Map<String, dynamic>>> categories = {
+    "Kablosuz ve Ağlar": [
+      {"title": "Wi-Fi", "intent": "android.settings.WIFI_SETTINGS"},
+      {"title": "Bluetooth", "intent": "android.settings.BLUETOOTH_SETTINGS"},
+      {"title": "Mobil Ağlar", "intent": "android.settings.DATA_ROAMING_SETTINGS"},
+      {"title": "Hotspot", "intent": "android.settings.TETHER_SETTINGS"},
+    ],
+    "Cihaz Bağlantısı": [
+      {"title": "NFC", "intent": "android.settings.NFC_SETTINGS"},
+      {"title": "Ekran Yansıtma", "intent": "android.settings.CAST_SETTINGS"},
+    ],
+    "Kişiselleştirme": [
+      {"title": "Duvar Kağıdı", "intent": "android.settings.WALLPAPER_SETTINGS"},
+      {"title": "Temalar", "intent": "android.settings.HOME_SETTINGS"},
+      {"title": "Kilit Ekranı", "intent": "android.settings.DISPLAY_SETTINGS"},
+    ],
+    "Uygulamalar": [
+      {"title": "Tüm Uygulamalar", "intent": "android.settings.APPLICATION_SETTINGS"},
+      {"title": "Varsayılan Uygulamalar", "intent": "android.settings.MANAGE_DEFAULT_APPS_SETTINGS"},
+    ],
+    "Depolama ve Bellek": [
+      {"title": "Depolama", "intent": "android.settings.INTERNAL_STORAGE_SETTINGS"},
+      {"title": "Bellek", "intent": "android.settings.MEMORY_CARD_SETTINGS"},
+    ],
+    "Güvenlik ve Gizlilik": [
+      {"title": "Ekran Kilidi", "intent": "android.settings.SECURITY_SETTINGS"},
+      {"title": "Konum", "intent": "android.settings.LOCATION_SOURCE_SETTINGS"},
+      {"title": "Şifreler", "intent": "android.settings.PRIVACY_SETTINGS"},
+    ],
+    "Sistem": [
+      {"title": "Dil ve Giriş", "intent": "android.settings.INPUT_METHOD_SETTINGS"},
+      {"title": "Tarih ve Saat", "intent": "android.settings.DATE_SETTINGS"},
+      {"title": "Yedekleme", "intent": "android.settings.BACKUP_AND_RESET_SETTINGS"},
+      {"title": "Telefon Hakkında", "about": true},
+    ],
+  };
 
-  void openSystemSettings(String action) {
+  void _openIntent(String action) {
     final intent = AndroidIntent(
       action: action,
       flags: <int>[Flag.FLAG_ACTIVITY_NEW_TASK],
@@ -61,114 +80,124 @@ class _SettingsHomeState extends State<SettingsHome> {
 
   @override
   Widget build(BuildContext context) {
-    final filteredItems = settingsItems
-        .where((item) =>
-            item["title"].toString().toLowerCase().contains(searchQuery.toLowerCase()))
-        .toList();
-
     return Scaffold(
       appBar: AppBar(
         title: const Text("Ayarlar"),
-        centerTitle: true,
         bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(55),
+          preferredSize: const Size.fromHeight(50),
           child: Padding(
             padding: const EdgeInsets.all(8.0),
             child: TextField(
               decoration: InputDecoration(
-                hintText: "Ayarları ara...",
+                hintText: "Ara...",
                 prefixIcon: const Icon(Icons.search),
                 filled: true,
                 fillColor: Colors.grey.shade200,
-                contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 12),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(25),
+                  borderRadius: BorderRadius.circular(20),
                   borderSide: BorderSide.none,
                 ),
               ),
               onChanged: (val) {
                 setState(() {
-                  searchQuery = val;
+                  query = val.toLowerCase();
                 });
               },
             ),
           ),
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(12),
-        child: ListView.builder(
-          itemCount: filteredItems.length,
-          itemBuilder: (context, index) {
-            final item = filteredItems[index];
-            return Card(
+      body: ListView(
+        children: categories.entries.map((entry) {
+          final groupTitle = entry.key;
+          final items = entry.value.where((item) {
+            final title = item["title"].toString().toLowerCase();
+            return title.contains(query);
+          }).toList();
+
+          if (items.isEmpty) return const SizedBox.shrink();
+
+          return Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Card(
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
               ),
-              elevation: 2,
-              margin: const EdgeInsets.symmetric(vertical: 8),
-              child: ListTile(
-                leading: CircleAvatar(
-                  backgroundColor: Colors.blue.shade100,
-                  child: Icon(item["icon"], color: Colors.blue),
-                ),
-                title: Text(
-                  item["title"],
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-                ),
-                trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                onTap: () {
-                  if (item.containsKey("custom")) {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const PhoneInfoScreen()),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    child: Text(groupTitle,
+                        style: const TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold)),
+                  ),
+                  const Divider(height: 1),
+                  ...items.map((item) {
+                    return Column(
+                      children: [
+                        ListTile(
+                          title: Text(item["title"]),
+                          trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                          onTap: () {
+                            if (item["about"] == true) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (_) => const AboutPhonePage()),
+                              );
+                            } else {
+                              _openIntent(item["intent"]);
+                            }
+                          },
+                        ),
+                        if (item != items.last) const Divider(height: 1),
+                      ],
                     );
-                  } else {
-                    openSystemSettings(item["action"]);
-                  }
-                },
+                  }),
+                ],
               ),
-            );
-          },
-        ),
+            ),
+          );
+        }).toList(),
       ),
     );
   }
 }
 
-class PhoneInfoScreen extends StatelessWidget {
-  const PhoneInfoScreen({super.key});
+class AboutPhonePage extends StatelessWidget {
+  const AboutPhonePage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final fakeInfo = {
+      "Android sürümü": "16",
+      "HiOS sürümü": "16",
+      "Model": "TECNO Spark Go 2024",
+      "RAM": "4 GB",
+      "Depolama": "128 GB",
+      "İşlemci": "MediaTek Helio A22",
+      "Knox sürümü": "3.10",
+      "Yapım numarası": "HIOS16.0.0.123 (Fake)",
+      "Güvenlik düzeltme eki": "1 Ağustos 2025",
+    };
+
     return Scaffold(
       appBar: AppBar(title: const Text("Telefon Hakkında")),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            infoTile("Cihaz Adı", "TECNO SPARK GO 2024"),
-            infoTile("Model", "BG6"),
-            infoTile("Android Sürümü", "16 (HiOS 16)"),
-            infoTile("Güvenlik Yaması", "5 Ağustos 2025"),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget infoTile(String title, String subtitle) {
-    return Card(
-      margin: const EdgeInsets.symmetric(vertical: 6),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: ListTile(
-        title: Text(title,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-        subtitle: Text(subtitle, style: const TextStyle(fontSize: 13)),
+      body: ListView(
+        children: fakeInfo.entries.map((e) {
+          return Column(
+            children: [
+              ListTile(
+                title: Text(e.key),
+                subtitle: Text(e.value),
+              ),
+              const Divider(height: 1),
+            ],
+          );
+        }).toList(),
       ),
     );
   }
