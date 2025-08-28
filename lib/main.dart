@@ -11,177 +11,133 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      title: 'Ayarlar Klonu',
+      theme: ThemeData(useMaterial3: true, colorSchemeSeed: Colors.blue),
+      home: const SettingsPage(),
       debugShowCheckedModeBanner: false,
-      home: SettingsHome(),
     );
   }
 }
 
-class SettingsHome extends StatefulWidget {
-  @override
-  State<SettingsHome> createState() => _SettingsHomeState();
-}
+class SettingsPage extends StatelessWidget {
+  const SettingsPage({super.key});
 
-class _SettingsHomeState extends State<SettingsHome> {
-  String searchQuery = "";
-
-  // 📌 Gruplar (başlıksız)
-  final List<List<Map<String, dynamic>>> groupedSettings = [
-    [
-      {'title': 'HiCloud', 'icon': Icons.cloud, 'intent': 'android.settings.CLOUD_SETTINGS'},
-      {'title': 'Telefonum', 'icon': Icons.phone_android, 'fake': true},
-    ],
-    [
-      {'title': 'SIM ve Ağ Ayarları', 'icon': Icons.sim_card, 'intent': 'android.settings.DATA_ROAMING_SETTINGS'},
-      {'title': 'Wi-Fi', 'icon': Icons.wifi, 'intent': 'android.settings.WIFI_SETTINGS'},
-      {'title': 'Bluetooth', 'icon': Icons.bluetooth, 'intent': 'android.settings.BLUETOOTH_SETTINGS'},
-      {'title': 'Erişim Noktası ve İnternet Paylaşımı', 'icon': Icons.wifi_tethering, 'intent': 'android.settings.TETHER_SETTINGS'},
-      {'title': 'Daha Fazla Bağlantı', 'icon': Icons.settings_input_component, 'intent': 'android.settings.AIRPLANE_MODE_SETTINGS'},
-    ],
-    [
-      {'title': 'Kişiselleştirme', 'icon': Icons.brush, 'intent': 'android.settings.HOME_SETTINGS'},
-      {'title': 'Ekran ve Parlaklık', 'icon': Icons.brightness_6, 'intent': 'android.settings.DISPLAY_SETTINGS'},
-      {'title': 'Ses ve Titreşim', 'icon': Icons.volume_up, 'intent': 'android.settings.SOUND_SETTINGS'},
-      {'title': 'Bildirim Paneli', 'icon': Icons.notifications, 'intent': 'android.settings.NOTIFICATION_SETTINGS'},
-    ],
-    [
-      {'title': 'Parola ve Güvenlik', 'icon': Icons.lock, 'intent': 'android.settings.SECURITY_SETTINGS'},
-      {'title': 'Gizlilik', 'icon': Icons.privacy_tip, 'intent': 'android.settings.PRIVACY_SETTINGS'},
-      {'title': 'Depolama', 'icon': Icons.sd_storage, 'intent': 'android.settings.INTERNAL_STORAGE_SETTINGS'},
-    ],
-    [
-      {'title': 'Uygulama Yönetimi', 'icon': Icons.apps, 'intent': 'android.settings.APPLICATION_SETTINGS'},
-      {'title': 'Konum', 'icon': Icons.location_on, 'intent': 'android.settings.LOCATION_SOURCE_SETTINGS'},
-    ],
-    [
-      {'title': 'Batarya Laboratuvarı', 'icon': Icons.battery_full, 'intent': 'android.settings.BATTERY_SAVER_SETTINGS'},
-      {'title': 'Dijital Denge ve Ebeveyn Denetimleri', 'icon': Icons.access_time, 'intent': 'android.settings.DIGITAL_WELLBEING_SETTINGS'},
-      {'title': 'Ekstra Özellikler', 'icon': Icons.extension, 'intent': 'android.settings.SETTINGS'},
-    ],
-    [
-      {'title': 'Kullanıcılar ve Hesaplar', 'icon': Icons.people, 'intent': 'android.settings.USER_SETTINGS'},
-      {'title': 'Güvenlik ve Acil Durum', 'icon': Icons.security, 'intent': 'android.settings.EMERGENCY_SETTINGS'},
-      {'title': 'Google', 'icon': Icons.g_mobiledata, 'intent': 'com.google.android.gms.settings.ADVANCED_SETTINGS_ACTIVITY'},
-    ],
-    [
-      {'title': 'Sistem', 'icon': Icons.settings, 'intent': 'android.settings.SETTINGS'},
-    ],
-  ];
+  void _openSystemSetting(String action) {
+    final intent = AndroidIntent(action: action);
+    intent.launch();
+  }
 
   @override
   Widget build(BuildContext context) {
-    // Arama filtresi
-    final filteredGroups = groupedSettings.map((group) {
-      return group
-          .where((item) => item['title']
-              .toString()
-              .toLowerCase()
-              .contains(searchQuery.toLowerCase()))
-          .toList();
-    }).where((group) => group.isNotEmpty).toList();
-
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Ayarlar"),
-        backgroundColor: Colors.blue,
-      ),
-      body: Column(
+      appBar: AppBar(title: const Text("Ayarlar")),
+      body: ListView(
+        padding: const EdgeInsets.all(8),
         children: [
-          // 📌 Arama Çubuğu
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: TextField(
-              decoration: InputDecoration(
-                hintText: "Ayarlar içinde ara...",
-                prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(23),
-                ),
-              ),
-              onChanged: (value) {
-                setState(() {
-                  searchQuery = value;
-                });
-              },
-            ),
-          ),
+          // 📌 Grup 1
+          _buildCard(context, [
+            _buildTile(context, Icons.info, "Telefonum", onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const TelefonumPage()),
+              );
+            }),
+            _buildTile(context, Icons.wifi, "Wi-Fi",
+                onTap: () => _openSystemSetting("android.settings.WIFI_SETTINGS")),
+          ]),
+          const SizedBox(height: 12),
 
-          // 📌 Ayar Listesi
-          Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.all(12),
-              itemCount: filteredGroups.length,
-              itemBuilder: (context, groupIndex) {
-                final items = filteredGroups[groupIndex];
+          // 📌 Grup 2
+          _buildCard(context, [
+            _buildTile(context, Icons.bluetooth, "Bluetooth",
+                onTap: () => _openSystemSetting("android.settings.BLUETOOTH_SETTINGS")),
+            _buildTile(context, Icons.language, "Dil ve Girdi",
+                onTap: () => _openSystemSetting("android.settings.LOCALE_SETTINGS")),
+            _buildTile(context, Icons.lock, "Güvenlik",
+                onTap: () => _openSystemSetting("android.settings.SECURITY_SETTINGS")),
+          ]),
+          const SizedBox(height: 12),
 
-                return Card(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(23),
-                  ),
-                  margin: const EdgeInsets.symmetric(vertical: 8),
-                  child: Column(
-                    children: items.map((item) {
-                      return ListTile(
-                        leading: Icon(item['icon'], color: Colors.blue),
-                        title: Text(item['title']),
-                        onTap: () async {
-                          if (item.containsKey('fake')) {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) => const PhoneInfoPage()),
-                            );
-                          } else {
-                            final intent = AndroidIntent(
-                              action: item['intent'],
-                            );
-                            await intent.launch();
-                          }
-                        },
-                      );
-                    }).toList(),
-                  ),
-                );
-              },
-            ),
-          ),
+          // 📌 Grup 3
+          _buildCard(context, [
+            _buildTile(context, Icons.battery_full, "Pil",
+                onTap: () => _openSystemSetting("android.settings.BATTERY_SAVER_SETTINGS")),
+            _buildTile(context, Icons.storage, "Depolama",
+                onTap: () => _openSystemSetting("android.settings.INTERNAL_STORAGE_SETTINGS")),
+          ]),
+          const SizedBox(height: 12),
+
+          // 📌 Grup 4
+          _buildCard(context, [
+            _buildTile(context, Icons.volume_up, "Ses",
+                onTap: () => _openSystemSetting("android.settings.SOUND_SETTINGS")),
+            _buildTile(context, Icons.display_settings, "Ekran",
+                onTap: () => _openSystemSetting("android.settings.DISPLAY_SETTINGS")),
+            _buildTile(context, Icons.notifications, "Bildirimler",
+                onTap: () => _openSystemSetting("android.settings.NOTIFICATION_SETTINGS")),
+          ]),
+          const SizedBox(height: 12),
+
+          // 📌 Grup 5
+          _buildCard(context, [
+            _buildTile(context, Icons.apps, "Uygulamalar",
+                onTap: () => _openSystemSetting("android.settings.APPLICATION_SETTINGS")),
+            _buildTile(context, Icons.update, "Sistem Güncelleme",
+                onTap: () => _openSystemSetting("android.settings.SYSTEM_UPDATE_SETTINGS")),
+          ]),
         ],
       ),
     );
   }
+
+  Widget _buildCard(BuildContext context, List<Widget> children) {
+    return Card(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      child: Column(children: children),
+    );
+  }
+
+  Widget _buildTile(BuildContext context, IconData icon, String title,
+      {VoidCallback? onTap}) {
+    return ListTile(
+      leading: Icon(icon, color: Colors.blue),
+      title: Text(title),
+      onTap: onTap,
+    );
+  }
 }
 
-class PhoneInfoPage extends StatelessWidget {
-  const PhoneInfoPage({super.key});
+class TelefonumPage extends StatelessWidget {
+  const TelefonumPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final bilgiler = [
+      {"title": "RAM", "value": "4 GB"},
+      {"title": "Dahili Depolama", "value": "128 GB"},
+      {"title": "Knox", "value": "Aktif"},
+      {"title": "Yapım Numarası", "value": "QP1A.190711.020"},
+      {"title": "Android Güvenlik Yaması", "value": "1 Ağustos 2025"},
+      {"title": "Çekirdek Sürümü", "value": "5.10.149-g3f8a0a1-dirty (gcc 9.3.0)"},
+      {"title": "Baseband Sürümü", "value": "MOLY.LR12A.R3.MP.V110.2.P21"},
+      {"title": "CPU", "value": "MediaTek Helio A22 (Quad-core 2.0 GHz)"},
+      {"title": "IMEI (Slot 1)", "value": "356789123456789"},
+      {"title": "IMEI (Slot 2)", "value": "356789123456780"},
+    ];
+
     return Scaffold(
       appBar: AppBar(title: const Text("Telefonum")),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: ListView(
-          children: const [
-            Text("Android Sürümü: 16", style: TextStyle(fontSize: 18)),
-            SizedBox(height: 8),
-            Text("HiOS Versiyonu: 16", style: TextStyle(fontSize: 18)),
-            SizedBox(height: 8),
-            Text("Model: TECNO Spark Go 2024", style: TextStyle(fontSize: 18)),
-            SizedBox(height: 8),
-            Text("RAM: 8 GB", style: TextStyle(fontSize: 18)),
-            SizedBox(height: 8),
-            Text("Depolama: 128 GB", style: TextStyle(fontSize: 18)),
-            SizedBox(height: 8),
-            Text("İşlemci: MediaTek Helio A22", style: TextStyle(fontSize: 18)),
-            SizedBox(height: 8),
-            Text("Cihaz Adı: Sinan'ın Telefonu", style: TextStyle(fontSize: 18)),
-            SizedBox(height: 8),
-            Text("IMEI: 356789123456789", style: TextStyle(fontSize: 18)),
-            SizedBox(height: 8),
-            Text("Güvenlik Yaması: 1 Ağustos 2025", style: TextStyle(fontSize: 18)),
-            SizedBox(height: 8),
-            Text("Knox: 3.9", style: TextStyle(fontSize: 18)),
-          ],
-        ),
+      body: ListView.separated(
+        padding: const EdgeInsets.all(12),
+        itemCount: bilgiler.length,
+        separatorBuilder: (_, __) => const Divider(height: 1),
+        itemBuilder: (context, index) {
+          final item = bilgiler[index];
+          return ListTile(
+            title: Text(item["title"]!),
+            subtitle: Text(item["value"]!),
+          );
+        },
       ),
     );
   }
