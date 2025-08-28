@@ -1,204 +1,93 @@
-import 'package:flutter/material.dart';
-import 'package:android_intent_plus/android_intent.dart';
-import 'package:android_intent_plus/flag.dart';
+import 'package:flutter/material.dart'; import 'package:android_intent_plus/android_intent.dart';
 
-void main() {
-  runApp(const SettingsApp());
-}
+void main() { runApp(const SettingsApp()); }
 
-class SettingsApp extends StatelessWidget {
-  const SettingsApp({super.key});
+class SettingsApp extends StatelessWidget { const SettingsApp({super.key});
 
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Ayarlar',
-      theme: ThemeData(
-        useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-      ),
-      home: const SettingsHome(),
-    );
-  }
-}
+@override Widget build(BuildContext context) { return MaterialApp( debugShowCheckedModeBanner: false, title: 'HiOS 16 Settings', theme: ThemeData( primarySwatch: Colors.blue, ), home: const SettingsHome(), ); } }
 
-class SettingsHome extends StatefulWidget {
-  const SettingsHome({super.key});
+class SettingsHome extends StatefulWidget { const SettingsHome({super.key});
 
-  @override
-  State<SettingsHome> createState() => _SettingsHomeState();
-}
+@override State<SettingsHome> createState() => _SettingsHomeState(); }
 
-class _SettingsHomeState extends State<SettingsHome> {
-  String query = "";
+class _SettingsHomeState extends State<SettingsHome> { final TextEditingController _searchController = TextEditingController();
 
-  final Map<String, List<Map<String, dynamic>>> categories = {
-    "Kablosuz ve Ağlar": [
-      {"title": "Wi-Fi", "intent": "android.settings.WIFI_SETTINGS"},
-      {"title": "Bluetooth", "intent": "android.settings.BLUETOOTH_SETTINGS"},
-      {"title": "Mobil Ağlar", "intent": "android.settings.DATA_ROAMING_SETTINGS"},
-      {"title": "Hotspot", "intent": "android.settings.TETHER_SETTINGS"},
-    ],
-    "Cihaz Bağlantısı": [
-      {"title": "NFC", "intent": "android.settings.NFC_SETTINGS"},
-      {"title": "Ekran Yansıtma", "intent": "android.settings.CAST_SETTINGS"},
-    ],
-    "Kişiselleştirme": [
-      {"title": "Duvar Kağıdı", "intent": "android.settings.WALLPAPER_SETTINGS"},
-      {"title": "Temalar", "intent": "android.settings.HOME_SETTINGS"},
-      {"title": "Kilit Ekranı", "intent": "android.settings.DISPLAY_SETTINGS"},
-    ],
-    "Uygulamalar": [
-      {"title": "Tüm Uygulamalar", "intent": "android.settings.APPLICATION_SETTINGS"},
-      {"title": "Varsayılan Uygulamalar", "intent": "android.settings.MANAGE_DEFAULT_APPS_SETTINGS"},
-    ],
-    "Depolama ve Bellek": [
-      {"title": "Depolama", "intent": "android.settings.INTERNAL_STORAGE_SETTINGS"},
-      {"title": "Bellek", "intent": "android.settings.MEMORY_CARD_SETTINGS"},
-    ],
-    "Güvenlik ve Gizlilik": [
-      {"title": "Ekran Kilidi", "intent": "android.settings.SECURITY_SETTINGS"},
-      {"title": "Konum", "intent": "android.settings.LOCATION_SOURCE_SETTINGS"},
-      {"title": "Şifreler", "intent": "android.settings.PRIVACY_SETTINGS"},
-    ],
-    "Sistem": [
-      {"title": "Dil ve Giriş", "intent": "android.settings.INPUT_METHOD_SETTINGS"},
-      {"title": "Tarih ve Saat", "intent": "android.settings.DATE_SETTINGS"},
-      {"title": "Yedekleme", "intent": "android.settings.BACKUP_AND_RESET_SETTINGS"},
-      {"title": "Telefon Hakkında", "about": true},
-    ],
-  };
+void openSystemSettings(String action) { final intent = AndroidIntent(action: action); intent.launch(); }
 
-  void _openIntent(String action) {
-    final intent = AndroidIntent(
-      action: action,
-      flags: <int>[Flag.FLAG_ACTIVITY_NEW_TASK],
-    );
-    intent.launch();
-  }
+@override Widget build(BuildContext context) { return Scaffold( appBar: AppBar( title: const Text('Ayarlar'), centerTitle: true, ), body: ListView( children: [ Padding( padding: const EdgeInsets.all(12), child: TextField( controller: _searchController, decoration: InputDecoration( hintText: 'Ayarları Ara', prefixIcon: const Icon(Icons.search), border: OutlineInputBorder( borderRadius: BorderRadius.circular(30), ), ), ), ),
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Ayarlar"),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(50),
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: TextField(
-              decoration: InputDecoration(
-                hintText: "Ara...",
-                prefixIcon: const Icon(Icons.search),
-                filled: true,
-                fillColor: Colors.grey.shade200,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 12),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20),
-                  borderSide: BorderSide.none,
-                ),
-              ),
-              onChanged: (val) {
-                setState(() {
-                  query = val.toLowerCase();
-                });
-              },
-            ),
-          ),
-        ),
-      ),
-      body: ListView(
-        children: categories.entries.map((entry) {
-          final groupTitle = entry.key;
-          final items = entry.value.where((item) {
-            final title = item["title"].toString().toLowerCase();
-            return title.contains(query);
-          }).toList();
-
-          if (items.isEmpty) return const SizedBox.shrink();
-
-          return Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Card(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    child: Text(groupTitle,
-                        style: const TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.bold)),
-                  ),
-                  const Divider(height: 1),
-                  ...items.map((item) {
-                    return Column(
-                      children: [
-                        ListTile(
-                          title: Text(item["title"]),
-                          trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                          onTap: () {
-                            if (item["about"] == true) {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (_) => const AboutPhonePage()),
-                              );
-                            } else {
-                              _openIntent(item["intent"]);
-                            }
-                          },
-                        ),
-                        if (item != items.last) const Divider(height: 1),
-                      ],
-                    );
-                  }),
-                ],
-              ),
-            ),
+// 1. Grup Profil + Telefonum
+      settingsGroup("📱 Profil & Telefon", [
+        settingsTile("Profil", () {
+          // Sahte profil
+        }),
+        settingsTile("Telefonum", () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const PhoneInfoPage()),
           );
-        }).toList(),
-      ),
-    );
-  }
+        }),
+      ]),
+
+      // 2. Grup Bağlantılar
+      settingsGroup("🌐 Bağlantılar", [
+        settingsTile("SIM ve Ağ Ayarları", () => openSystemSettings('android.settings.NETWORK_OPERATOR_SETTINGS')),
+        settingsTile("Wi-Fi", () => openSystemSettings('android.settings.WIFI_SETTINGS')),
+        settingsTile("Bluetooth", () => openSystemSettings('android.settings.BLUETOOTH_SETTINGS')),
+        settingsTile("Erişim Noktası ve İnternet Paylaşımı", () => openSystemSettings('android.settings.WIRELESS_SETTINGS')),
+        settingsTile("Daha Fazla Bağlantı", () => openSystemSettings('android.settings.AIRPLANE_MODE_SETTINGS')),
+      ]),
+
+      // 3. Grup Kişiselleştirme
+      settingsGroup("🎨 Kişiselleştirme", [
+        settingsTile("Kişiselleştirme", () {}),
+        settingsTile("Ekran ve Parlaklık", () => openSystemSettings('android.settings.DISPLAY_SETTINGS')),
+        settingsTile("Ses ve Titreşim", () => openSystemSettings('android.settings.SOUND_SETTINGS')),
+        settingsTile("Bildirim Paneli", () => openSystemSettings('android.settings.NOTIFICATION_SETTINGS')),
+      ]),
+
+      // 4. Grup Güvenlik
+      settingsGroup("🔒 Güvenlik & Gizlilik", [
+        settingsTile("Parola ve Güvenlik", () => openSystemSettings('android.settings.SECURITY_SETTINGS')),
+        settingsTile("Gizlilik", () => openSystemSettings('android.settings.PRIVACY_SETTINGS')),
+        settingsTile("Depolama", () => openSystemSettings('android.settings.INTERNAL_STORAGE_SETTINGS')),
+      ]),
+
+      // 5. Grup Uygulamalar
+      settingsGroup("⚙️ Uygulamalar & Konum", [
+        settingsTile("Uygulama Yönetimi", () => openSystemSettings('android.settings.APPLICATION_SETTINGS')),
+        settingsTile("Konum", () => openSystemSettings('android.settings.LOCATION_SOURCE_SETTINGS')),
+      ]),
+
+      // 6. Grup Batarya
+      settingsGroup("🔋 Batarya & Dijital Sağlık", [
+        settingsTile("Batarya Laboratuvarı", () => openSystemSettings('android.settings.BATTERY_SAVER_SETTINGS')),
+        settingsTile("Dijital Denge ve Ebeveyn Denetimleri", () => openSystemSettings('android.settings.DIGITAL_WELLBEING_SETTINGS')),
+        settingsTile("Ekstra Özellikler", () {}),
+      ]),
+
+      // 7. Grup Hesaplar
+      settingsGroup("👥 Hesaplar & Güvenlik", [
+        settingsTile("Kullanıcılar ve Hesaplar", () => openSystemSettings('android.settings.ADD_ACCOUNT_SETTINGS')),
+        settingsTile("Güvenlik ve Acil Durum", () => openSystemSettings('android.settings.SAFETY_CENTER')),
+        settingsTile("Google", () => openSystemSettings('android.settings.GOOGLE_SETTINGS')),
+      ]),
+
+      // 8. Grup Sistem
+      settingsGroup("⚙️ Sistem", [
+        settingsTile("Sistem", () => openSystemSettings('android.settings.SETTINGS')),
+      ]),
+    ],
+  ),
+);
+
 }
 
-class AboutPhonePage extends StatelessWidget {
-  const AboutPhonePage({super.key});
+Widget settingsGroup(String title, List<Widget> children) { return Padding( padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6), child: Column( crossAxisAlignment: CrossAxisAlignment.start, children: [ Padding( padding: const EdgeInsets.all(8.0), child: Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)), ), Card( shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)), child: Column( children: List.generate(children.length * 2 - 1, (index) { if (index.isEven) { return children[index ~/ 2]; } else { return const Divider(height: 1); } }), ), ) ], ), ); }
 
-  @override
-  Widget build(BuildContext context) {
-    final fakeInfo = {
-      "Android sürümü": "16",
-      "HiOS sürümü": "16",
-      "Model": "TECNO Spark Go 2024",
-      "RAM": "4 GB",
-      "Depolama": "128 GB",
-      "İşlemci": "MediaTek Helio A22",
-      "Knox sürümü": "3.10",
-      "Yapım numarası": "HIOS16.0.0.123 (Fake)",
-      "Güvenlik düzeltme eki": "1 Ağustos 2025",
-    };
+Widget settingsTile(String title, VoidCallback onTap) { return ListTile( title: Text(title), trailing: const Icon(Icons.arrow_forward_ios, size: 16), onTap: onTap, ); } }
 
-    return Scaffold(
-      appBar: AppBar(title: const Text("Telefon Hakkında")),
-      body: ListView(
-        children: fakeInfo.entries.map((e) {
-          return Column(
-            children: [
-              ListTile(
-                title: Text(e.key),
-                subtitle: Text(e.value),
-              ),
-              const Divider(height: 1),
-            ],
-          );
-        }).toList(),
-      ),
-    );
-  }
-}
+class PhoneInfoPage extends StatelessWidget { const PhoneInfoPage({super.key});
+
+@override Widget build(BuildContext context) { return Scaffold( appBar: AppBar(title: const Text("Telefonum")), body: Padding( padding: const EdgeInsets.all(16.0), child: Column( crossAxisAlignment: CrossAxisAlignment.start, children: const [ Text("Android Sürümü: 16", style: TextStyle(fontSize: 18)), SizedBox(height: 8), Text("HiOS Sürümü: 16", style: TextStyle(fontSize: 18)), SizedBox(height: 8), Text("Model: Tecno Spark Go 2024", style: TextStyle(fontSize: 18)), SizedBox(height: 8), Text("RAM: 4 GB", style: TextStyle(fontSize: 18)), SizedBox(height: 8), Text("Knox: Güvenlik aktif (sahte)", style: TextStyle(fontSize: 18)), ], ), ), ); } }
+
