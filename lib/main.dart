@@ -17,7 +17,14 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class SettingsHome extends StatelessWidget {
+class SettingsHome extends StatefulWidget {
+  @override
+  State<SettingsHome> createState() => _SettingsHomeState();
+}
+
+class _SettingsHomeState extends State<SettingsHome> {
+  String searchQuery = "";
+
   // 📌 Gruplar (başlıksız)
   final List<List<Map<String, dynamic>>> groupedSettings = [
     [
@@ -61,49 +68,83 @@ class SettingsHome extends StatelessWidget {
     ],
   ];
 
-  SettingsHome({super.key});
-
   @override
   Widget build(BuildContext context) {
+    // Arama filtresi
+    final filteredGroups = groupedSettings.map((group) {
+      return group
+          .where((item) => item['title']
+              .toString()
+              .toLowerCase()
+              .contains(searchQuery.toLowerCase()))
+          .toList();
+    }).where((group) => group.isNotEmpty).toList();
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("Ayarlar"),
         backgroundColor: Colors.blue,
       ),
-      body: ListView.builder(
-        padding: const EdgeInsets.all(12),
-        itemCount: groupedSettings.length,
-        itemBuilder: (context, groupIndex) {
-          final items = groupedSettings[groupIndex];
+      body: Column(
+        children: [
+          // 📌 Arama Çubuğu
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
+              decoration: InputDecoration(
+                hintText: "Ayarlar içinde ara...",
+                prefixIcon: const Icon(Icons.search),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(23),
+                ),
+              ),
+              onChanged: (value) {
+                setState(() {
+                  searchQuery = value;
+                });
+              },
+            ),
+          ),
 
-          return Card(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(23), // 📌 Grup kartı oval
-            ),
-            margin: const EdgeInsets.symmetric(vertical: 8),
-            child: Column(
-              children: items.map((item) {
-                return ListTile(
-                  leading: Icon(item['icon'], color: Colors.blue),
-                  title: Text(item['title']),
-                  onTap: () async {
-                    if (item.containsKey('fake')) {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const PhoneInfoPage()),
+          // 📌 Ayar Listesi
+          Expanded(
+            child: ListView.builder(
+              padding: const EdgeInsets.all(12),
+              itemCount: filteredGroups.length,
+              itemBuilder: (context, groupIndex) {
+                final items = filteredGroups[groupIndex];
+
+                return Card(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(23),
+                  ),
+                  margin: const EdgeInsets.symmetric(vertical: 8),
+                  child: Column(
+                    children: items.map((item) {
+                      return ListTile(
+                        leading: Icon(item['icon'], color: Colors.blue),
+                        title: Text(item['title']),
+                        onTap: () async {
+                          if (item.containsKey('fake')) {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const PhoneInfoPage()),
+                            );
+                          } else {
+                            final intent = AndroidIntent(
+                              action: item['intent'],
+                            );
+                            await intent.launch();
+                          }
+                        },
                       );
-                    } else {
-                      final intent = AndroidIntent(
-                        action: item['intent'],
-                      );
-                      await intent.launch();
-                    }
-                  },
+                    }).toList(),
+                  ),
                 );
-              }).toList(),
+              },
             ),
-          );
-        },
+          ),
+        ],
       ),
     );
   }
@@ -118,8 +159,7 @@ class PhoneInfoPage extends StatelessWidget {
       appBar: AppBar(title: const Text("Telefonum")),
       body: Padding(
         padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: ListView(
           children: const [
             Text("Android Sürümü: 16", style: TextStyle(fontSize: 18)),
             SizedBox(height: 8),
@@ -128,6 +168,16 @@ class PhoneInfoPage extends StatelessWidget {
             Text("Model: TECNO Spark Go 2024", style: TextStyle(fontSize: 18)),
             SizedBox(height: 8),
             Text("RAM: 8 GB", style: TextStyle(fontSize: 18)),
+            SizedBox(height: 8),
+            Text("Depolama: 128 GB", style: TextStyle(fontSize: 18)),
+            SizedBox(height: 8),
+            Text("İşlemci: MediaTek Helio A22", style: TextStyle(fontSize: 18)),
+            SizedBox(height: 8),
+            Text("Cihaz Adı: Sinan'ın Telefonu", style: TextStyle(fontSize: 18)),
+            SizedBox(height: 8),
+            Text("IMEI: 356789123456789", style: TextStyle(fontSize: 18)),
+            SizedBox(height: 8),
+            Text("Güvenlik Yaması: 1 Ağustos 2025", style: TextStyle(fontSize: 18)),
             SizedBox(height: 8),
             Text("Knox: 3.9", style: TextStyle(fontSize: 18)),
           ],
