@@ -1,19 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:android_intent_plus/android_intent.dart';
+import 'package:android_intent_plus/flag.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(const SettingsApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class SettingsApp extends StatelessWidget {
+  const SettingsApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
       title: "Ayarlar",
-      theme: ThemeData.dark(),
+      theme: ThemeData(
+        useMaterial3: true,
+        colorSchemeSeed: Colors.blue,
+      ),
       home: const SettingsHome(),
     );
   }
@@ -29,100 +32,79 @@ class SettingsHome extends StatefulWidget {
 class _SettingsHomeState extends State<SettingsHome> {
   final TextEditingController _searchController = TextEditingController();
 
-  final Map<String, List<Map<String, dynamic>>> groupedSettings = {
-    "Bağlantılar": [
-      {"title": "SIM ve Ağ", "intent": "android.settings.DATA_ROAMING_SETTINGS", "icon": Icons.sim_card},
-      {"title": "Wi-Fi", "intent": "android.settings.WIFI_SETTINGS", "icon": Icons.wifi},
-      {"title": "Bluetooth", "intent": "android.settings.BLUETOOTH_SETTINGS", "icon": Icons.bluetooth},
-      {"title": "Hotspot", "intent": "android.settings.WIRELESS_SETTINGS", "icon": Icons.share},
-    ],
-    "Kişiselleştirme": [
-      {"title": "Telefonum", "intent": "custom", "icon": Icons.phone_android},
-      {"title": "Duvar Kağıdı", "intent": "android.settings.HOME_SETTINGS", "icon": Icons.brush},
-      {"title": "Ekran & Parlaklık", "intent": "android.settings.DISPLAY_SETTINGS", "icon": Icons.brightness_6},
-      {"title": "Ses & Titreşim", "intent": "android.settings.SOUND_SETTINGS", "icon": Icons.volume_up},
-    ],
-    "Gizlilik & Güvenlik": [
-      {"title": "Bildirimler", "intent": "android.settings.NOTIFICATION_SETTINGS", "icon": Icons.notifications},
-      {"title": "Parola & Güvenlik", "intent": "android.settings.SECURITY_SETTINGS", "icon": Icons.lock},
-      {"title": "Gizlilik", "intent": "android.settings.PRIVACY_SETTINGS", "icon": Icons.privacy_tip},
-      {"title": "Konum", "intent": "android.settings.LOCATION_SOURCE_SETTINGS", "icon": Icons.location_on},
-    ],
-    "Sistem": [
-      {"title": "Depolama", "intent": "android.settings.INTERNAL_STORAGE_SETTINGS", "icon": Icons.sd_storage},
-      {"title": "Uygulamalar", "intent": "android.settings.APPLICATION_SETTINGS", "icon": Icons.apps},
-      {"title": "Batarya", "intent": "android.settings.BATTERY_SAVER_SETTINGS", "icon": Icons.battery_full},
-      {"title": "Google", "intent": "android.settings.GOOGLE_SETTINGS", "icon": Icons.account_circle},
-      {"title": "Sistem", "intent": "android.settings.SETTINGS", "icon": Icons.settings},
-    ]
-  };
-
-  void openIntent(String action) {
-    if (action == "custom") {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (_) => const PhoneInfoPage()),
-      );
-    } else {
-      final intent = AndroidIntent(action: action);
-      intent.launch();
-    }
-  }
+  final List<Map<String, dynamic>> settings = [
+    {"title": "HiCloud", "intent": AndroidIntent(action: 'android.settings.SETTINGS')},
+    {"title": "Telefonum", "fake": true},
+    {"title": "SIM ve Ağ Ayarları", "intent": AndroidIntent(action: 'android.settings.DATA_ROAMING_SETTINGS')},
+    {"title": "Wi-Fi", "intent": AndroidIntent(action: 'android.settings.WIFI_SETTINGS')},
+    {"title": "Bluetooth", "intent": AndroidIntent(action: 'android.settings.BLUETOOTH_SETTINGS')},
+    {"title": "Erişim Noktası ve İnternet Paylaşımı", "intent": AndroidIntent(action: 'android.settings.TETHER_SETTINGS')},
+    {"title": "Daha Fazla Bağlantı", "intent": AndroidIntent(action: 'android.settings.AIRPLANE_MODE_SETTINGS')},
+    {"title": "Kişiselleştirme", "intent": AndroidIntent(action: 'android.settings.HOME_SETTINGS')},
+    {"title": "Ekran ve Parlaklık", "intent": AndroidIntent(action: 'android.settings.DISPLAY_SETTINGS')},
+    {"title": "Ses ve Titreşim", "intent": AndroidIntent(action: 'android.settings.SOUND_SETTINGS')},
+    {"title": "Bildirim Paneli", "intent": AndroidIntent(action: 'android.settings.NOTIFICATION_SETTINGS')},
+    {"title": "Parola ve Güvenlik", "intent": AndroidIntent(action: 'android.settings.SECURITY_SETTINGS')},
+    {"title": "Gizlilik", "intent": AndroidIntent(action: 'android.settings.PRIVACY_SETTINGS')},
+    {"title": "Depolama", "intent": AndroidIntent(action: 'android.settings.INTERNAL_STORAGE_SETTINGS')},
+    {"title": "Uygulama Yönetimi", "intent": AndroidIntent(action: 'android.settings.MANAGE_APPLICATIONS_SETTINGS')},
+    {"title": "Konum", "intent": AndroidIntent(action: 'android.settings.LOCATION_SOURCE_SETTINGS')},
+    {"title": "Batarya Labaratuvarı", "intent": AndroidIntent(action: 'android.settings.BATTERY_SAVER_SETTINGS')},
+    {"title": "Dijital Denge ve Ebeveyn Denetimleri", "intent": AndroidIntent(action: 'android.settings.DIGITAL_WELLBEING_SETTINGS')},
+    {"title": "Ekstra Özellikler", "intent": AndroidIntent(action: 'android.settings.ACCESSIBILITY_SETTINGS')},
+    {"title": "Kullanıcılar ve Hesaplar", "intent": AndroidIntent(action: 'android.settings.SYNC_SETTINGS')},
+    {"title": "Güvenlik ve Acil Durum", "intent": AndroidIntent(action: 'android.settings.ALL_APPS_SETTINGS')},
+    {"title": "Google", "intent": AndroidIntent(action: 'android.settings.APPLICATION_DETAILS_SETTINGS', data: "package:com.google.android.gms")},
+    {"title": "Sistem", "intent": AndroidIntent(action: 'android.settings.SETTINGS')},
+  ];
 
   @override
   Widget build(BuildContext context) {
-    String query = _searchController.text.toLowerCase();
-
-    // Filtreleme
-    Map<String, List<Map<String, dynamic>>> filteredGroups = {};
-    groupedSettings.forEach((group, items) {
-      var filtered = items.where((i) => i["title"].toLowerCase().contains(query)).toList();
-      if (filtered.isNotEmpty) {
-        filteredGroups[group] = filtered;
-      }
-    });
-
     return Scaffold(
-      appBar: AppBar(title: const Text("Ayarlar"), centerTitle: true),
+      appBar: AppBar(title: const Text("Ayarlar")),
       body: Column(
         children: [
-          // 🔍 Arama Çubuğu
           Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.all(12),
             child: TextField(
               controller: _searchController,
-              onChanged: (v) => setState(() {}),
               decoration: InputDecoration(
                 hintText: "Ayarları ara...",
                 prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(25),
-                ),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(20)),
               ),
+              onChanged: (value) => setState(() {}),
             ),
           ),
-
-          // 📌 Gruplar
           Expanded(
-            child: ListView(
-              children: filteredGroups.entries.map((entry) {
-                return Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[900],
-                    borderRadius: BorderRadius.circular(20), // 🔵 Oval köşeler
-                  ),
-                  child: Column(
-                    children: entry.value.map((item) {
-                      return ListTile(
-                        leading: Icon(item["icon"], color: Colors.blueAccent),
-                        title: Text(item["title"]),
-                        onTap: () => openIntent(item["intent"]),
-                      );
-                    }).toList(),
+            child: ListView.builder(
+              itemCount: settings.length,
+              itemBuilder: (context, index) {
+                final item = settings[index];
+                if (_searchController.text.isNotEmpty &&
+                    !item["title"].toString().toLowerCase().contains(_searchController.text.toLowerCase())) {
+                  return const SizedBox.shrink();
+                }
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  child: Card(
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                    child: ListTile(
+                      title: Text(item["title"]),
+                      onTap: () {
+                        if (item.containsKey("fake") && item["fake"] == true) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const PhoneInfoPage()),
+                          );
+                        } else if (item["intent"] != null) {
+                          item["intent"].launch();
+                        }
+                      },
+                    ),
                   ),
                 );
-              }).toList(),
+              },
             ),
           ),
         ],
@@ -138,49 +120,21 @@ class PhoneInfoPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text("Telefonum")),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: ListView(
-          children: const [
-            InfoTile("Cihaz adı", "TECNO SPARK GO 2024"),
-            InfoTile("Model", "TECNO BG6"),
-            InfoTile("Android versiyonu", "16"),
-            InfoTile("CPU", "UMS9230 (T606)"),
-            InfoTile("Ön kamera", "8 MP"),
-            InfoTile("Arka Kamera", "13 MP Dual"),
-            InfoTile("RAM", "4 GB (+2 GB Genişletilebilir)"),
-            InfoTile("ROM", "128 GB"),
-            InfoTile("Pil", "5000 mAh"),
-            InfoTile("Ekran", "720 x 1612"),
-            InfoTile("HiOS Sürümü", "HiOS 16.0"),
-            InfoTile("Derleme Numarası", "BG6-FAKE-ANDROID16"),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class InfoTile extends StatelessWidget {
-  final String title;
-  final String value;
-
-  const InfoTile(this.title, this.value, {super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 6),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.grey[850],
-        borderRadius: BorderRadius.circular(15),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
-          Text(value, style: const TextStyle(color: Colors.blueAccent)),
+      body: ListView(
+        children: const [
+          ListTile(title: Text("Android Sürümü"), subtitle: Text("16")),
+          ListTile(title: Text("HiOS Sürümü"), subtitle: Text("HiOS 16")),
+          ListTile(title: Text("Model"), subtitle: Text("TECNO Spark Go 2024")),
+          ListTile(title: Text("RAM"), subtitle: Text("4 GB")),
+          ListTile(title: Text("Dahili Depolama"), subtitle: Text("128 GB")),
+          ListTile(title: Text("Knox"), subtitle: Text("Aktif")),
+          ListTile(title: Text("Yapım Numarası"), subtitle: Text("QP1A.190711.020")),
+          ListTile(title: Text("Android Güvenlik Yaması"), subtitle: Text("1 Ağustos 2025")),
+          ListTile(title: Text("Çekirdek Sürümü"), subtitle: Text("5.10.149-g3f8a0a1-dirty (gcc 9.3.0)")),
+          ListTile(title: Text("Baseband Sürümü"), subtitle: Text("MOLY.LR12A.R3.MP.V110.2.P21")),
+          ListTile(title: Text("CPU"), subtitle: Text("MediaTek Helio A22 (Quad-core 2.0 GHz)")),
+          ListTile(title: Text("IMEI (Slot 1)"), subtitle: Text("356789123456789")),
+          ListTile(title: Text("IMEI (Slot 2)"), subtitle: Text("356789123456780")),
         ],
       ),
     );
