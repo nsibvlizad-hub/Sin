@@ -34,13 +34,10 @@ class _SettingsPageState extends State<SettingsPage> {
 
   // Tüm kategoriler
   final List<List<Map<String, dynamic>>> groupedCategories = [
-    // Grup 1 (2 kategori)
     [
       {"title": "HiCloud", "icon": Icons.cloud, "action": "android.settings.CLOUD_SETTINGS"},
       {"title": "Telefonum", "icon": Icons.phone_android, "action": "custom_phone"},
     ],
-
-    // Grup 2 (5 kategori)
     [
       {"title": "SIM ve Ağ Ayarları", "icon": Icons.sim_card, "action": "android.settings.NETWORK_OPERATOR_SETTINGS"},
       {"title": "Wi-Fi", "icon": Icons.wifi, "action": "android.settings.WIFI_SETTINGS"},
@@ -48,16 +45,12 @@ class _SettingsPageState extends State<SettingsPage> {
       {"title": "Erişim Noktası ve Paylaşım", "icon": Icons.share, "action": "android.settings.TETHER_SETTINGS"},
       {"title": "Daha Fazla Bağlantı", "icon": Icons.more_horiz, "action": "android.settings.DATA_ROAMING_SETTINGS"},
     ],
-
-    // Grup 3 (4 kategori)
     [
       {"title": "Kişiselleştirme", "icon": Icons.palette, "action": "android.settings.HOME_SETTINGS"},
       {"title": "Ekran ve Parlaklık", "icon": Icons.brightness_6, "action": "android.settings.DISPLAY_SETTINGS"},
       {"title": "Ses ve Titreşim", "icon": Icons.volume_up, "action": "android.settings.SOUND_SETTINGS"},
       {"title": "Bildirim Paneli", "icon": Icons.notifications, "action": "android.settings.NOTIFICATION_SETTINGS"},
     ],
-
-    // Grup 4 (5 kategori)
     [
       {"title": "Parola ve Güvenlik", "icon": Icons.lock, "action": "android.settings.SECURITY_SETTINGS"},
       {"title": "Gizlilik", "icon": Icons.privacy_tip, "action": "android.settings.PRIVACY_SETTINGS"},
@@ -65,22 +58,16 @@ class _SettingsPageState extends State<SettingsPage> {
       {"title": "Uygulama Yönetimi", "icon": Icons.apps, "action": "android.settings.APPLICATION_SETTINGS"},
       {"title": "Konum", "icon": Icons.location_on, "action": "android.settings.LOCATION_SOURCE_SETTINGS"},
     ],
-
-    // Grup 5 (3 kategori)
     [
       {"title": "Batarya Laboratuvarı", "icon": Icons.battery_full, "action": "android.settings.BATTERY_SAVER_SETTINGS"},
       {"title": "Dijital Denge", "icon": Icons.timelapse, "action": "android.settings.DIGITAL_WELLBEING_SETTINGS"},
       {"title": "Ekstra Özellikler", "icon": Icons.extension, "action": "android.settings.MANAGE_DEFAULT_APPS_SETTINGS"},
     ],
-
-    // Grup 6 (3 kategori)
     [
       {"title": "Kullanıcılar ve Hesaplar", "icon": Icons.people, "action": "android.settings.SYNC_SETTINGS"},
       {"title": "Güvenlik ve Acil Durum", "icon": Icons.warning, "action": "android.settings.SETTINGS"},
       {"title": "Google", "icon": Icons.g_mobiledata, "action": "android.settings.GOOGLE_SETTINGS"},
     ],
-
-    // Grup 7 (1 kategori)
     [
       {"title": "Sistem", "icon": Icons.system_update, "action": "android.settings.SETTINGS"},
     ],
@@ -98,8 +85,6 @@ class _SettingsPageState extends State<SettingsPage> {
               style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
-
-            // 🔍 Arama Çubuğu
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: TextField(
@@ -120,8 +105,6 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
             ),
             const SizedBox(height: 16),
-
-            // Liste
             Expanded(
               child: ListView.builder(
                 padding: const EdgeInsets.all(12),
@@ -182,8 +165,29 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 }
 
-class PhoneInfoPage extends StatelessWidget {
+class PhoneInfoPage extends StatefulWidget {
   const PhoneInfoPage({super.key});
+
+  @override
+  State<PhoneInfoPage> createState() => _PhoneInfoPageState();
+}
+
+class _PhoneInfoPageState extends State<PhoneInfoPage> {
+  int _tapCount = 0; // kaç kez tıklandığını sayıyoruz
+
+  void _handleAndroidVersionTap() {
+    setState(() {
+      _tapCount++;
+      if (_tapCount >= 7) {
+        _tapCount = 0; // sıfırla
+        final intent = AndroidIntent(
+          action: "android.intent.action.MAIN",
+          package: "com.dede.android_eggs",
+        );
+        intent.launch();
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -191,19 +195,22 @@ class PhoneInfoPage extends StatelessWidget {
       appBar: AppBar(title: const Text("Telefonum")),
       body: ListView(
         padding: const EdgeInsets.all(16),
-        children: const [
-          InfoTile(title: "Android Sürümü", value: "16"),
-          InfoTile(title: "HiOS Sürümü", value: "16.0"),
-          InfoTile(title: "Cihaz Modeli", value: "TECNO Spark Go 2024"),
-          InfoTile(title: "RAM", value: "6 GB"),
-          InfoTile(title: "Dahili Depolama", value: "128 GB"),
-          InfoTile(title: "Knox", value: "Aktif"),
-          InfoTile(title: "Yapı Numarası", value: "SPARK_GO_16.0_STABLE"),
-          InfoTile(title: "Güvenlik Yaması", value: "1 Ağustos 2025"),
-          InfoTile(title: "Çekirdek Sürümü", value: "5.15.89"),
-          InfoTile(title: "Baseband", value: "MOLY.LR12.W22"),
-          InfoTile(title: "CPU", value: "Octa-Core 2.0GHz"),
-          InfoTile(title: "IMEI", value: "352345678901234"),
+        children: [
+          GestureDetector(
+            onTap: _handleAndroidVersionTap,
+            child: const InfoTile(title: "Android Sürümü", value: "16"),
+          ),
+          const InfoTile(title: "HiOS Sürümü", value: "16.0"),
+          const InfoTile(title: "Cihaz Modeli", value: "TECNO Spark Go 2024"),
+          const InfoTile(title: "RAM", value: "6 GB"),
+          const InfoTile(title: "Dahili Depolama", value: "128 GB"),
+          const InfoTile(title: "Knox", value: "Aktif"),
+          const InfoTile(title: "Yapı Numarası", value: "SPARK_GO_16.0_STABLE"),
+          const InfoTile(title: "Güvenlik Yaması", value: "1 Ağustos 2025"),
+          const InfoTile(title: "Çekirdek Sürümü", value: "5.15.89"),
+          const InfoTile(title: "Baseband", value: "MOLY.LR12.W22"),
+          const InfoTile(title: "CPU", value: "Octa-Core 2.0GHz"),
+          const InfoTile(title: "IMEI", value: "352345678901234"),
         ],
       ),
     );
