@@ -34,10 +34,13 @@ class _SettingsPageState extends State<SettingsPage> {
 
   // Tüm kategoriler
   final List<List<Map<String, dynamic>>> groupedCategories = [
+    // Grup 1
     [
       {"title": "HiCloud", "icon": Icons.cloud, "action": "android.settings.CLOUD_SETTINGS"},
       {"title": "Telefonum", "icon": Icons.phone_android, "action": "custom_phone"},
     ],
+
+    // Grup 2
     [
       {"title": "SIM ve Ağ Ayarları", "icon": Icons.sim_card, "action": "android.settings.NETWORK_OPERATOR_SETTINGS"},
       {"title": "Wi-Fi", "icon": Icons.wifi, "action": "android.settings.WIFI_SETTINGS"},
@@ -45,12 +48,16 @@ class _SettingsPageState extends State<SettingsPage> {
       {"title": "Erişim Noktası ve Paylaşım", "icon": Icons.share, "action": "android.settings.TETHER_SETTINGS"},
       {"title": "Daha Fazla Bağlantı", "icon": Icons.more_horiz, "action": "android.settings.DATA_ROAMING_SETTINGS"},
     ],
+
+    // Grup 3
     [
       {"title": "Kişiselleştirme", "icon": Icons.palette, "action": "android.settings.HOME_SETTINGS"},
       {"title": "Ekran ve Parlaklık", "icon": Icons.brightness_6, "action": "android.settings.DISPLAY_SETTINGS"},
       {"title": "Ses ve Titreşim", "icon": Icons.volume_up, "action": "android.settings.SOUND_SETTINGS"},
       {"title": "Bildirim Paneli", "icon": Icons.notifications, "action": "android.settings.NOTIFICATION_SETTINGS"},
     ],
+
+    // Grup 4
     [
       {"title": "Parola ve Güvenlik", "icon": Icons.lock, "action": "android.settings.SECURITY_SETTINGS"},
       {"title": "Gizlilik", "icon": Icons.privacy_tip, "action": "android.settings.PRIVACY_SETTINGS"},
@@ -58,16 +65,22 @@ class _SettingsPageState extends State<SettingsPage> {
       {"title": "Uygulama Yönetimi", "icon": Icons.apps, "action": "android.settings.APPLICATION_SETTINGS"},
       {"title": "Konum", "icon": Icons.location_on, "action": "android.settings.LOCATION_SOURCE_SETTINGS"},
     ],
+
+    // Grup 5
     [
       {"title": "Batarya Laboratuvarı", "icon": Icons.battery_full, "action": "android.settings.BATTERY_SAVER_SETTINGS"},
       {"title": "Dijital Denge", "icon": Icons.timelapse, "action": "android.settings.DIGITAL_WELLBEING_SETTINGS"},
       {"title": "Ekstra Özellikler", "icon": Icons.extension, "action": "android.settings.MANAGE_DEFAULT_APPS_SETTINGS"},
     ],
+
+    // Grup 6
     [
       {"title": "Kullanıcılar ve Hesaplar", "icon": Icons.people, "action": "android.settings.SYNC_SETTINGS"},
       {"title": "Güvenlik ve Acil Durum", "icon": Icons.warning, "action": "android.settings.SETTINGS"},
       {"title": "Google", "icon": Icons.g_mobiledata, "action": "android.settings.GOOGLE_SETTINGS"},
     ],
+
+    // Grup 7
     [
       {"title": "Sistem", "icon": Icons.system_update, "action": "android.settings.SETTINGS"},
     ],
@@ -85,6 +98,8 @@ class _SettingsPageState extends State<SettingsPage> {
               style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
+
+            // 🔍 Arama Çubuğu
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: TextField(
@@ -105,6 +120,8 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
             ),
             const SizedBox(height: 16),
+
+            // Liste
             Expanded(
               child: ListView.builder(
                 padding: const EdgeInsets.all(12),
@@ -173,20 +190,19 @@ class PhoneInfoPage extends StatefulWidget {
 }
 
 class _PhoneInfoPageState extends State<PhoneInfoPage> {
-  int _tapCount = 0; // kaç kez tıklandığını sayıyoruz
+  int _tapCount = 0;
 
   void _handleAndroidVersionTap() {
-    setState(() {
-      _tapCount++;
-      if (_tapCount >= 7) {
-        _tapCount = 0; // sıfırla
-        final intent = AndroidIntent(
-          action: "android.intent.action.MAIN",
-          package: "com.dede.android_eggs",
-        );
-        intent.launch();
-      }
-    });
+    _tapCount++;
+    if (_tapCount >= 3) {
+      _tapCount = 0;
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => const Android16TextPage(),
+        ),
+      );
+    }
   }
 
   @override
@@ -196,9 +212,13 @@ class _PhoneInfoPageState extends State<PhoneInfoPage> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          GestureDetector(
+          ListTile(
+            title: const Text("Android Sürümü"),
+            trailing: const Text(
+              "16",
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
             onTap: _handleAndroidVersionTap,
-            child: const InfoTile(title: "Android Sürümü", value: "16"),
           ),
           const InfoTile(title: "HiOS Sürümü", value: "16.0"),
           const InfoTile(title: "Cihaz Modeli", value: "TECNO Spark Go 2024"),
@@ -217,6 +237,58 @@ class _PhoneInfoPageState extends State<PhoneInfoPage> {
   }
 }
 
+class Android16TextPage extends StatefulWidget {
+  const Android16TextPage({super.key});
+
+  @override
+  State<Android16TextPage> createState() => _Android16TextPageState();
+}
+
+class _Android16TextPageState extends State<Android16TextPage>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    );
+    _scaleAnimation =
+        CurvedAnimation(parent: _controller, curve: Curves.easeOutBack);
+
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: Center(
+        child: ScaleTransition(
+          scale: _scaleAnimation,
+          child: const Text(
+            "Android 16",
+            style: TextStyle(
+              fontSize: 42,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class InfoTile extends StatelessWidget {
   final String title;
   final String value;
@@ -226,7 +298,10 @@ class InfoTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       title: Text(title),
-      trailing: Text(value, style: const TextStyle(fontWeight: FontWeight.bold)),
+      trailing: Text(
+        value,
+        style: const TextStyle(fontWeight: FontWeight.bold),
+      ),
     );
   }
 }
